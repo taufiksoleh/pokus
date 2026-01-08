@@ -11,7 +11,7 @@ activityCompose = "1.9.3"
 composeBom = "2024.12.01"
 
 # Room
-room = "2.6.1"
+room = "2.8.4"
 
 # Navigation
 navigationCompose = "2.8.5"
