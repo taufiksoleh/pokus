@@ -4,7 +4,13 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import com.tscorp.pokus.data.preferences.PreferencesManager
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -14,31 +20,38 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class BootReceiver : BroadcastReceiver() {
 
-    // TODO: Inject preferences manager in Phase 4 to check if focus mode was enabled
-    // @Inject
-    // lateinit var preferencesManager: PreferencesManager
+    @Inject
+    lateinit var preferencesManager: PreferencesManager
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED ||
             intent.action == "android.intent.action.QUICKBOOT_POWERON"
         ) {
-            // Check if focus mode was enabled before reboot
-            // This will be implemented in Phase 4 when we have the preferences manager
-            restartServiceIfNeeded(context)
+            // Use goAsync() to extend the time we have to complete the work
+            val pendingResult = goAsync()
+
+            scope.launch {
+                try {
+                    restartServiceIfNeeded(context)
+                } finally {
+                    pendingResult.finish()
+                }
+            }
         }
     }
 
     /**
      * Restarts the monitoring service if focus mode was previously enabled.
      */
-    private fun restartServiceIfNeeded(context: Context) {
-        // TODO: Check preferences if focus mode was enabled
-        // For now, this is a stub that will be implemented in Phase 4
-        //
-        // Example implementation:
-        // if (preferencesManager.isFocusModeEnabled()) {
-        //     startMonitoringService(context)
-        // }
+    private suspend fun restartServiceIfNeeded(context: Context) {
+        // Check if focus mode was enabled before reboot
+        val isFocusModeEnabled = preferencesManager.isFocusModeEnabled.first()
+
+        if (isFocusModeEnabled) {
+            startMonitoringService(context)
+        }
     }
 
     /**
