@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.tscorp.pokus.ui.theme.PokusTheme
@@ -32,6 +33,8 @@ class BlockOverlayActivity : ComponentActivity() {
         blockedAppName = intent.getStringExtra(EXTRA_APP_NAME) ?: "App"
         blockedPackageName = intent.getStringExtra(EXTRA_PACKAGE_NAME) ?: ""
 
+        setupBackPressHandler()
+
         setContent {
             PokusTheme(darkTheme = true) {
                 BlockOverlayScreen(
@@ -40,6 +43,18 @@ class BlockOverlayActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    /**
+     * Sets up the back press handler using the modern OnBackPressedCallback.
+     * Redirects back press to home screen instead of dismissing the overlay.
+     */
+    private fun setupBackPressHandler() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                navigateToHome()
+            }
+        })
     }
 
     /**
@@ -52,17 +67,6 @@ class BlockOverlayActivity : ComponentActivity() {
         }
         startActivity(homeIntent)
         finish()
-    }
-
-    /**
-     * Prevent back press from dismissing the overlay easily.
-     * User must tap "Go Back Home" button.
-     */
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        // Intentionally prevent default back behavior
-        // User must use the "Go Back Home" button
-        navigateToHome()
     }
 
     companion object {
