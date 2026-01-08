@@ -1,6 +1,11 @@
 package com.tscorp.pokus.di
 
 import android.content.Context
+import androidx.room.Room
+import com.tscorp.pokus.data.local.PokusDatabase
+import com.tscorp.pokus.data.local.dao.BlockedAppDao
+import com.tscorp.pokus.data.preferences.PreferencesManager
+import com.tscorp.pokus.data.repository.AppRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,17 +22,49 @@ import javax.inject.Singleton
 object AppModule {
 
     /**
-     * Provides the application context.
-     * Use this when you need a context that outlives activities.
+     * Provides the Room database instance.
      */
     @Provides
     @Singleton
-    fun provideApplicationContext(
+    fun providePokusDatabase(
         @ApplicationContext context: Context
-    ): Context = context
+    ): PokusDatabase {
+        return Room.databaseBuilder(
+            context,
+            PokusDatabase::class.java,
+            PokusDatabase.DATABASE_NAME
+        ).build()
+    }
 
-    // TODO: Add more providers in later phases:
-    // - PreferencesManager (Phase 2)
-    // - PokusDatabase (Phase 2)
-    // - AppRepository (Phase 2)
+    /**
+     * Provides the BlockedAppDao from the database.
+     */
+    @Provides
+    @Singleton
+    fun provideBlockedAppDao(database: PokusDatabase): BlockedAppDao {
+        return database.blockedAppDao()
+    }
+
+    /**
+     * Provides the PreferencesManager for DataStore preferences.
+     */
+    @Provides
+    @Singleton
+    fun providePreferencesManager(
+        @ApplicationContext context: Context
+    ): PreferencesManager {
+        return PreferencesManager(context)
+    }
+
+    /**
+     * Provides the AppRepository for data access.
+     */
+    @Provides
+    @Singleton
+    fun provideAppRepository(
+        blockedAppDao: BlockedAppDao,
+        preferencesManager: PreferencesManager
+    ): AppRepository {
+        return AppRepository(blockedAppDao, preferencesManager)
+    }
 }
