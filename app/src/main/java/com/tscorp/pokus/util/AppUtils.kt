@@ -90,7 +90,7 @@ object AppUtils {
                 )
             }
             .distinctBy { it.packageName }
-            .sortedBy { it.appName.lowercase() }
+            .sortedWith(compareByDescending<InstalledApp> { it.isBlocked }.thenBy { it.appName.lowercase() })
     }
 
     /**
