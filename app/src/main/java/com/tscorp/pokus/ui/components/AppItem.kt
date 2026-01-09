@@ -23,9 +23,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
@@ -107,6 +109,7 @@ fun AppItem(
 
 /**
  * A composable that displays an app icon.
+ * Caches the bitmap conversion to prevent memory leaks and improve performance.
  *
  * @param icon The drawable icon to display
  * @param contentDescription Content description for accessibility
@@ -118,9 +121,20 @@ fun AppIcon(
     contentDescription: String,
     modifier: Modifier = Modifier
 ) {
-    if (icon != null) {
+    // Cache the bitmap conversion to prevent creating new bitmaps on each recomposition
+    val cachedBitmap: ImageBitmap? = remember(icon) {
+        icon?.let {
+            try {
+                it.toBitmap().asImageBitmap()
+            } catch (e: Exception) {
+                null
+            }
+        }
+    }
+
+    if (cachedBitmap != null) {
         Image(
-            bitmap = icon.toBitmap().asImageBitmap(),
+            bitmap = cachedBitmap,
             contentDescription = contentDescription,
             modifier = modifier.clip(RoundedCornerShape(12.dp)),
             contentScale = ContentScale.Fit

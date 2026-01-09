@@ -112,7 +112,21 @@ object AppUtils {
             packageManager.getApplicationIcon(packageName)
         } catch (e: PackageManager.NameNotFoundException) {
             null
+        } catch (e: Exception) {
+            // Handle any other exceptions (e.g., SecurityException)
+            null
         }
+    }
+
+    /**
+     * Get the app icon for a given package name using Context.
+     *
+     * @param context Application context
+     * @param packageName Package name of the app
+     * @return App icon drawable or null if unavailable
+     */
+    fun getAppIcon(context: Context, packageName: String): Drawable? {
+        return getAppIcon(context.packageManager, packageName)
     }
 
     /**

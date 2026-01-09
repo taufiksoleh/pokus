@@ -24,9 +24,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
@@ -108,7 +110,8 @@ fun BlockedAppCard(
 }
 
 /**
- * A composable that displays a blocked app icon with a blocked indicator.
+ * A composable that displays a blocked app icon.
+ * Caches the bitmap conversion to prevent memory leaks.
  */
 @Composable
 private fun BlockedAppIcon(
@@ -116,10 +119,21 @@ private fun BlockedAppIcon(
     contentDescription: String,
     modifier: Modifier = Modifier
 ) {
+    // Cache the bitmap conversion to prevent creating new bitmaps on each recomposition
+    val cachedBitmap: ImageBitmap? = remember(icon) {
+        icon?.let {
+            try {
+                it.toBitmap().asImageBitmap()
+            } catch (e: Exception) {
+                null
+            }
+        }
+    }
+
     Box(modifier = modifier) {
-        if (icon != null) {
+        if (cachedBitmap != null) {
             Image(
-                bitmap = icon.toBitmap().asImageBitmap(),
+                bitmap = cachedBitmap,
                 contentDescription = contentDescription,
                 modifier = Modifier
                     .size(44.dp)
@@ -147,6 +161,7 @@ private fun BlockedAppIcon(
 
 /**
  * A compact card for displaying blocked apps in a horizontal list.
+ * Caches the bitmap conversion to prevent memory leaks.
  */
 @Composable
 fun BlockedAppChip(
@@ -154,6 +169,17 @@ fun BlockedAppChip(
     icon: Drawable?,
     modifier: Modifier = Modifier
 ) {
+    // Cache the bitmap conversion to prevent creating new bitmaps on each recomposition
+    val cachedBitmap: ImageBitmap? = remember(icon) {
+        icon?.let {
+            try {
+                it.toBitmap().asImageBitmap()
+            } catch (e: Exception) {
+                null
+            }
+        }
+    }
+
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(20.dp),
@@ -164,9 +190,9 @@ fun BlockedAppChip(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            if (icon != null) {
+            if (cachedBitmap != null) {
                 Image(
-                    bitmap = icon.toBitmap().asImageBitmap(),
+                    bitmap = cachedBitmap,
                     contentDescription = appName,
                     modifier = Modifier
                         .size(24.dp)
