@@ -111,6 +111,7 @@ class AppListViewModel @Inject constructor(
     fun toggleAppBlocked(app: InstalledApp) {
         viewModelScope.launch {
             try {
+                // Update the blocked status in repository
                 if (app.isBlocked) {
                     // Unblock the app
                     appRepository.unblockApp(app.packageName)
@@ -119,8 +120,19 @@ class AppListViewModel @Inject constructor(
                     appRepository.blockApp(app.packageName, app.appName)
                 }
 
-                // Refresh the app list to reflect changes
-                loadApps()
+                // Update the app in place without full list refresh
+                val updatedApps = _uiState.value.apps.map { installedApp ->
+                    if (installedApp.packageName == app.packageName) {
+                        installedApp.copy(isBlocked = !app.isBlocked)
+                    } else {
+                        installedApp
+                    }
+                }.sortedWith(compareByDescending<InstalledApp> { it.isBlocked }.thenBy { it.appName.lowercase() })
+
+                _uiState.value = _uiState.value.copy(
+                    apps = updatedApps,
+                    filteredApps = filterApps(updatedApps, _uiState.value.searchQuery)
+                )
 
                 // Notify service to refresh blocked apps if focus mode is enabled
                 refreshServiceIfNeeded()
