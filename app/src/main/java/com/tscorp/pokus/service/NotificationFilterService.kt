@@ -9,7 +9,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -34,25 +35,17 @@ class NotificationFilterService : NotificationListenerService() {
         super.onCreate()
         Log.d(TAG, "NotificationFilterService created")
 
-        // Load blocked packages when service starts
+        // Listen for changes to blocked apps and update the cached set
         serviceScope.launch {
-            try {
-                blockedPackages = appRepository.getBlockedPackageNames().first().toSet()
-                Log.d(TAG, "Loaded ${blockedPackages.size} blocked packages")
-            } catch (e: Exception) {
-                Log.e(TAG, "Error loading blocked packages", e)
-            }
-        }
+            appRepository.activeBlockedApps
+                .map { blockedApps -> blockedApps.map { it.packageName }.toSet() }
+                .collect { packages ->
+                    blockedPackages = packages
+                    Log.d(TAG, "Updated blocked packages: ${blockedPackages.size} apps")
 
-        // Listen for changes to blocked apps
-        serviceScope.launch {
-            appRepository.getBlockedPackageNames().collect { packages ->
-                blockedPackages = packages.toSet()
-                Log.d(TAG, "Updated blocked packages: ${blockedPackages.size} apps")
-
-                // Check and dismiss any existing notifications from newly blocked apps
-                checkAndDismissBlockedNotifications()
-            }
+                    // Check and dismiss any existing notifications from blocked apps
+                    checkAndDismissBlockedNotifications()
+                }
         }
     }
 
