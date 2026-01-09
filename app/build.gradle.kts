@@ -6,6 +6,13 @@ plugins {
     alias(libs.plugins.hilt.android)
 }
 
+// Load keystore properties from keystore.properties file
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties = java.util.Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(java.io.FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace = "com.tscorp.pokus"
     compileSdk = 35
@@ -27,6 +34,14 @@ android {
             keyAlias = "androiddebugkey"
             keyPassword = "android"
         }
+        create("release") {
+            if (keystorePropertiesFile.exists()) {
+                storeFile = file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
     }
 
     buildTypes {
@@ -37,8 +52,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // Use debug signing for now; replace with release keystore for production
-            signingConfig = signingConfigs.getByName("debug")
+            // Use release signing configuration for production builds
+            signingConfig = signingConfigs.getByName("release")
         }
         debug {
             isMinifyEnabled = false

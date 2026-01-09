@@ -13,3 +13,10 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Keystore files - NEVER commit these to version control
+keystore.properties
+keystore.base64
+*.keystore
+*.jks
+!app/keystore/debug.keystore
