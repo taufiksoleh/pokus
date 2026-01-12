@@ -355,6 +355,7 @@ class PomodoroService : Service() {
      */
     private fun broadcastState() {
         val intent = Intent(ACTION_TIMER_UPDATE).apply {
+            setPackage(packageName)
             putExtra(EXTRA_IS_RUNNING, timerJob?.isActive == true)
             putExtra(EXTRA_IS_PAUSED, isPaused)
             putExtra(EXTRA_PHASE, currentPhase.name)
