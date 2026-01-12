@@ -1,10 +1,16 @@
 package com.tscorp.pokus.ui.screens.home
 
 import android.content.Context
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,48 +18,29 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tscorp.pokus.ui.components.BlockedAppCard
 import com.tscorp.pokus.ui.components.ProductivityCard
 import com.tscorp.pokus.ui.screens.pomodoro.PomodoroViewModel
-import com.tscorp.pokus.ui.theme.CornerRadius
-import com.tscorp.pokus.ui.theme.Elevation
 import com.tscorp.pokus.ui.theme.Spacing
 import com.tscorp.pokus.util.AppUtils
 
 /**
- * Home screen displaying the focus mode toggle and blocked apps list.
- *
- * @param onNavigateToAppList Callback to navigate to the app list screen
- * @param onNavigateToSettings Callback to navigate to the settings screen
- * @param viewModel The HomeViewModel instance
+ * Modern, clean home screen with bottom navigation.
+ * Displays productivity card and blocked apps list.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    onNavigateToAppList: () -> Unit,
-    onNavigateToSettings: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
     pomodoroViewModel: PomodoroViewModel = hiltViewModel()
 ) {
@@ -63,62 +50,41 @@ fun HomeScreen(
     val pomodoroState by pomodoroViewModel.pomodoroState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Pokus",
-                        style = MaterialTheme.typography.headlineMedium
-                    )
-                },
-                actions = {
-                    IconButton(
-                        onClick = onNavigateToSettings,
-                        modifier = Modifier.padding(end = Spacing.xs)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onNavigateToAppList,
-                containerColor = MaterialTheme.colorScheme.primary,
-                elevation = androidx.compose.material3.FloatingActionButtonDefaults.elevation(
-                    defaultElevation = Elevation.level3
-                )
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            horizontal = Spacing.lg,
+            vertical = Spacing.lg
+        ),
+        verticalArrangement = Arrangement.spacedBy(Spacing.xl)
+    ) {
+        // Welcome Header
+        item {
+            Column(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add apps to block"
+                Text(
+                    text = "Focus",
+                    style = MaterialTheme.typography.displaySmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(Spacing.xs))
+                Text(
+                    text = "Stay productive, eliminate distractions",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-        },
-        containerColor = MaterialTheme.colorScheme.surface
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            contentPadding = PaddingValues(
-                start = Spacing.md,
-                end = Spacing.md,
-                top = Spacing.sm,
-                bottom = Spacing.md
-            ),
-            verticalArrangement = Arrangement.spacedBy(Spacing.lg)
-        ) {
-            // Unified Productivity Card (Focus Mode + Pomodoro Timer)
-            item {
+        }
+
+        // Unified Productivity Card (Focus Mode + Pomodoro Timer)
+        item {
+            AnimatedVisibility(
+                visible = true,
+                enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) +
+                        scaleIn(spring(stiffness = Spring.StiffnessMediumLow)),
+                exit = fadeOut() + scaleOut()
+            ) {
                 ProductivityCard(
                     focusEnabled = focusState.isEnabled,
                     focusDuration = focusState.formattedDuration,
@@ -131,38 +97,43 @@ fun HomeScreen(
                     onPomodoroSkip = { pomodoroViewModel.skipPhase() }
                 )
             }
+        }
 
-            // Blocked Apps Section Header
-            if (blockedApps.isNotEmpty()) {
-                item {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = Spacing.xs)
-                    ) {
-                        Text(
-                            text = "Blocked Apps",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.height(Spacing.xs))
-                        Text(
-                            text = "${blockedApps.size} ${if (blockedApps.size == 1) "app" else "apps"} will be blocked during focus sessions",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+        // Blocked Apps Section
+        if (blockedApps.isNotEmpty()) {
+            item {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Blocked Apps",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(Spacing.xs))
+                    Text(
+                        text = "${blockedApps.size} ${if (blockedApps.size == 1) "app" else "apps"} will be blocked during focus mode",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            // Blocked Apps List
+            items(
+                items = blockedApps,
+                key = { it.packageName }
+            ) { blockedApp ->
+                val appIcon = remember(blockedApp.packageName) {
+                    getAppIcon(context, blockedApp.packageName)
                 }
 
-                // Blocked Apps List
-                items(
-                    items = blockedApps,
-                    key = { it.packageName }
-                ) { blockedApp ->
-                    val appIcon = remember(blockedApp.packageName) {
-                        getAppIcon(context, blockedApp.packageName)
-                    }
-
+                AnimatedVisibility(
+                    visible = true,
+                    enter = fadeIn(spring(stiffness = Spring.StiffnessLow)) +
+                            scaleIn(initialScale = 0.9f, animationSpec = spring(stiffness = Spring.StiffnessLow)),
+                    exit = fadeOut() + scaleOut()
+                ) {
                     BlockedAppCard(
                         appName = blockedApp.appName,
                         packageName = blockedApp.packageName,
@@ -170,43 +141,45 @@ fun HomeScreen(
                         onRemove = { viewModel.unblockApp(blockedApp.packageName) }
                     )
                 }
-            } else {
-                // Empty state
-                item {
-                    EmptyBlockedAppsState(
-                        onAddApps = onNavigateToAppList
-                    )
-                }
+            }
+        } else {
+            // Empty state
+            item {
+                EmptyBlockedAppsState()
             }
         }
     }
 }
 
 /**
- * Empty state displayed when no apps are blocked.
+ * Modern empty state with better messaging.
  */
 @Composable
-private fun EmptyBlockedAppsState(
-    onAddApps: () -> Unit
-) {
+private fun EmptyBlockedAppsState() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = Spacing.xxl),
+            .padding(vertical = Spacing.xxxl),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
+            text = "📱",
+            style = MaterialTheme.typography.displayLarge
+        )
+        Spacer(modifier = Modifier.height(Spacing.md))
+        Text(
             text = "No apps blocked yet",
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(Spacing.sm))
         Text(
-            text = "Add apps to block during focus sessions",
-            style = MaterialTheme.typography.bodyMedium,
+            text = "Go to Apps tab to select apps you want to block during focus sessions",
+            style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            textAlign = TextAlign.Center
         )
     }
 }
