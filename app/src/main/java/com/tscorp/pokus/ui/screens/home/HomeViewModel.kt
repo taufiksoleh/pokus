@@ -85,6 +85,21 @@ class HomeViewModel @Inject constructor(
                 _uiState.value = state
             }
         }
+
+        // Automatically start/stop monitoring service when focus mode state changes
+        viewModelScope.launch {
+            var previousFocusState = false
+            focusState.collect { state ->
+                if (state.isEnabled != previousFocusState) {
+                    if (state.isEnabled) {
+                        startMonitoringService()
+                    } else {
+                        stopMonitoringService()
+                    }
+                    previousFocusState = state.isEnabled
+                }
+            }
+        }
     }
 
     /**
