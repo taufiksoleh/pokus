@@ -49,51 +49,41 @@ import com.tscorp.pokus.ui.theme.Spacing
 import kotlin.math.roundToInt
 
 /**
- * Settings screen for app configuration.
- *
- * @param onNavigateBack Callback to navigate back
- * @param viewModel The SettingsViewModel instance
+ * Modern settings screen with clean layout.
+ * Works with bottom navigation.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    onNavigateBack: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
     pomodoroViewModel: PomodoroViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val pomodoroSettings by pomodoroViewModel.pomodoroSettings.collectAsStateWithLifecycle()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Settings",
-                        style = MaterialTheme.typography.headlineMedium
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            )
-        }
-    ) { innerPadding ->
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
+        // Header Section
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.lg, vertical = Spacing.lg)
         ) {
+            Text(
+                text = "Settings",
+                style = MaterialTheme.typography.displaySmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(Spacing.xs))
+            Text(
+                text = "Customize your focus experience",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
             // App Settings Section
             SettingsSection(title = "App Settings") {
                 SettingsSwitchItem(
@@ -203,32 +193,32 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
         }
+    }
 
-        // Clear Data Confirmation Dialog
-        if (uiState.showClearDataDialog) {
-            AlertDialog(
-                onDismissRequest = { viewModel.hideClearDataDialog() },
-                title = { Text("Clear All Data") },
-                text = {
-                    Text("This will remove all blocked apps and disable focus mode. Are you sure?")
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = { viewModel.clearAllData() }
-                    ) {
-                        Text(
-                            "Clear",
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { viewModel.hideClearDataDialog() }) {
-                        Text("Cancel")
-                    }
+    // Clear Data Confirmation Dialog
+    if (uiState.showClearDataDialog) {
+        AlertDialog(
+            onDismissRequest = { viewModel.hideClearDataDialog() },
+            title = { Text("Clear All Data") },
+            text = {
+                Text("This will remove all blocked apps and disable focus mode. Are you sure?")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { viewModel.clearAllData() }
+                ) {
+                    Text(
+                        "Clear",
+                        color = MaterialTheme.colorScheme.error
+                    )
                 }
-            )
-        }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.hideClearDataDialog() }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 
