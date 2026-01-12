@@ -18,6 +18,8 @@ import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material3.Slider
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -42,7 +44,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tscorp.pokus.ui.screens.pomodoro.PomodoroViewModel
 import com.tscorp.pokus.util.PermissionUtils
+import kotlin.math.roundToInt
 
 /**
  * Settings screen for app configuration.
@@ -54,9 +58,11 @@ import com.tscorp.pokus.util.PermissionUtils
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
-    viewModel: SettingsViewModel = hiltViewModel()
+    viewModel: SettingsViewModel = hiltViewModel(),
+    pomodoroViewModel: PomodoroViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val pomodoroSettings by pomodoroViewModel.pomodoroSettings.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val hasNotificationListenerAccess = remember(context) {
         PermissionUtils.hasNotificationListenerPermission(context)
@@ -117,6 +123,83 @@ fun SettingsScreen(
                     isChecked = uiState.showSystemApps,
                     onCheckedChange = { viewModel.toggleShowSystemApps() }
                 )
+            }
+
+            // Pomodoro Settings Section
+            SettingsSection(title = "Pomodoro Timer") {
+                Column {
+                    // Work duration slider
+                    SettingsSliderItem(
+                        icon = Icons.Default.Timer,
+                        title = "Work Session",
+                        description = "Duration of focus work sessions",
+                        value = pomodoroSettings.workDurationMinutes.toFloat(),
+                        onValueChange = { pomodoroViewModel.updateWorkDuration(it.roundToInt()) },
+                        valueRange = 1f..120f,
+                        valueLabel = "${pomodoroSettings.workDurationMinutes} min"
+                    )
+
+                    HorizontalDivider()
+
+                    // Short break slider
+                    SettingsSliderItem(
+                        icon = Icons.Default.Timer,
+                        title = "Short Break",
+                        description = "Duration of short breaks",
+                        value = pomodoroSettings.shortBreakMinutes.toFloat(),
+                        onValueChange = { pomodoroViewModel.updateShortBreak(it.roundToInt()) },
+                        valueRange = 1f..30f,
+                        valueLabel = "${pomodoroSettings.shortBreakMinutes} min"
+                    )
+
+                    HorizontalDivider()
+
+                    // Long break slider
+                    SettingsSliderItem(
+                        icon = Icons.Default.Timer,
+                        title = "Long Break",
+                        description = "Duration of long breaks",
+                        value = pomodoroSettings.longBreakMinutes.toFloat(),
+                        onValueChange = { pomodoroViewModel.updateLongBreak(it.roundToInt()) },
+                        valueRange = 5f..60f,
+                        valueLabel = "${pomodoroSettings.longBreakMinutes} min"
+                    )
+
+                    HorizontalDivider()
+
+                    // Pomodoros until long break slider
+                    SettingsSliderItem(
+                        icon = Icons.Default.Timer,
+                        title = "Pomodoros Until Long Break",
+                        description = "Number of work sessions before a long break",
+                        value = pomodoroSettings.pomodorosUntilLongBreak.toFloat(),
+                        onValueChange = { pomodoroViewModel.updatePomodorosUntilLongBreak(it.roundToInt()) },
+                        valueRange = 2f..10f,
+                        valueLabel = "${pomodoroSettings.pomodorosUntilLongBreak}"
+                    )
+
+                    HorizontalDivider()
+
+                    // Auto-start breaks switch
+                    SettingsSwitchItem(
+                        icon = Icons.Default.Timer,
+                        title = "Auto-Start Breaks",
+                        description = "Automatically start break timers after work sessions",
+                        isChecked = pomodoroSettings.autoStartBreaks,
+                        onCheckedChange = { pomodoroViewModel.updateAutoStartBreaks(it) }
+                    )
+
+                    HorizontalDivider()
+
+                    // Auto-start pomodoros switch
+                    SettingsSwitchItem(
+                        icon = Icons.Default.Timer,
+                        title = "Auto-Start Work Sessions",
+                        description = "Automatically start work sessions after breaks",
+                        isChecked = pomodoroSettings.autoStartPomodoros,
+                        onCheckedChange = { pomodoroViewModel.updateAutoStartPomodoros(it) }
+                    )
+                }
             }
 
             // Data Section
@@ -326,6 +409,67 @@ private fun SettingsInfoItem(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+/**
+ * A settings item with a slider.
+ */
+@Composable
+private fun SettingsSliderItem(
+    icon: ImageVector,
+    title: String,
+    description: String,
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    valueRange: ClosedFloatingPointRange<Float>,
+    valueLabel: String
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Text(
+                text = valueLabel,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Slider(
+            value = value,
+            onValueChange = onValueChange,
+            valueRange = valueRange,
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }

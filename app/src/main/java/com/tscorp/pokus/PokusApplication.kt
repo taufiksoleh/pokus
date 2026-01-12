@@ -46,8 +46,18 @@ class PokusApplication : Application() {
                 enableVibration(true)
             }
 
+            // Channel for Pomodoro timer
+            val pomodoroChannel = NotificationChannel(
+                CHANNEL_POMODORO,
+                "Pomodoro Timer",
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = "Shows Pomodoro timer progress"
+                setShowBadge(false)
+            }
+
             notificationManager.createNotificationChannels(
-                listOf(focusChannel, alertChannel)
+                listOf(focusChannel, alertChannel, pomodoroChannel)
             )
         }
     }
@@ -55,5 +65,6 @@ class PokusApplication : Application() {
     companion object {
         const val CHANNEL_FOCUS_SERVICE = "focus_service_channel"
         const val CHANNEL_BLOCK_ALERT = "block_alert_channel"
+        const val CHANNEL_POMODORO = "pomodoro_channel"
     }
 }

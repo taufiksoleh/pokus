@@ -76,6 +76,16 @@
                 android:value="productivity_app_blocker" />
         </service>
 
+        <!-- Pomodoro Timer Service - Manages Pomodoro timer -->
+        <service
+            android:name=".service.PomodoroService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="pomodoro_timer" />
+        </service>
+
         <!-- Notification Filter Service - Filters notifications from blocked apps -->
         <service
             android:name=".service.NotificationFilterService"

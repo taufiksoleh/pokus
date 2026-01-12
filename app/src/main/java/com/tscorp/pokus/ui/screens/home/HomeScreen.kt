@@ -36,6 +36,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tscorp.pokus.ui.components.BlockedAppCard
 import com.tscorp.pokus.ui.components.FocusToggle
+import com.tscorp.pokus.ui.components.PomodoroTimer
+import com.tscorp.pokus.ui.screens.pomodoro.PomodoroViewModel
 import com.tscorp.pokus.util.AppUtils
 
 /**
@@ -50,11 +52,13 @@ import com.tscorp.pokus.util.AppUtils
 fun HomeScreen(
     onNavigateToAppList: () -> Unit,
     onNavigateToSettings: () -> Unit,
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
+    pomodoroViewModel: PomodoroViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val focusState by viewModel.focusState.collectAsStateWithLifecycle()
     val blockedApps by viewModel.blockedApps.collectAsStateWithLifecycle()
+    val pomodoroState by pomodoroViewModel.pomodoroState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     Scaffold(
@@ -106,6 +110,17 @@ fun HomeScreen(
                     onToggle = { viewModel.toggleFocusMode() },
                     focusDuration = focusState.formattedDuration,
                     blockedAppsCount = focusState.blockedAppsCount
+                )
+            }
+
+            // Pomodoro Timer Card
+            item {
+                PomodoroTimer(
+                    pomodoroState = pomodoroState,
+                    onStart = { phase -> pomodoroViewModel.startTimer(phase) },
+                    onPauseResume = { pomodoroViewModel.togglePauseResume() },
+                    onStop = { pomodoroViewModel.stopTimer() },
+                    onSkip = { pomodoroViewModel.skipPhase() }
                 )
             }
 
