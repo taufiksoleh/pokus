@@ -84,8 +84,9 @@ fun SettingsScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-            // App Settings Section
-            SettingsSection(title = "App Settings") {
+
+        // App Settings Section
+        SettingsSection(title = "App Settings") {
                 SettingsSwitchItem(
                     icon = Icons.Default.Apps,
                     title = "Show System Apps",
@@ -182,17 +183,16 @@ fun SettingsScreen(
                 )
             }
 
-            // About Section
-            SettingsSection(title = "About") {
-                SettingsInfoItem(
-                    icon = Icons.Default.Info,
-                    title = "Version",
-                    value = "1.0.0"
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
+        // About Section
+        SettingsSection(title = "About") {
+            SettingsInfoItem(
+                icon = Icons.Default.Info,
+                title = "Version",
+                value = "1.0.0"
+            )
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
     }
 
     // Clear Data Confirmation Dialog
