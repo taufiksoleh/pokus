@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -42,56 +43,50 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tscorp.pokus.ui.screens.pomodoro.PomodoroViewModel
+import com.tscorp.pokus.ui.theme.CornerRadius
+import com.tscorp.pokus.ui.theme.IconSize
+import com.tscorp.pokus.ui.theme.Spacing
 import kotlin.math.roundToInt
 
 /**
- * Settings screen for app configuration.
- *
- * @param onNavigateBack Callback to navigate back
- * @param viewModel The SettingsViewModel instance
+ * Modern settings screen with clean layout.
+ * Works with bottom navigation.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    onNavigateBack: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
     pomodoroViewModel: PomodoroViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val pomodoroSettings by pomodoroViewModel.pomodoroSettings.collectAsStateWithLifecycle()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Settings",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
-            )
-        }
-    ) { innerPadding ->
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
+        // Header Section
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.lg, vertical = Spacing.lg)
         ) {
-            // App Settings Section
-            SettingsSection(title = "App Settings") {
+            Text(
+                text = "Settings",
+                style = MaterialTheme.typography.displaySmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(Spacing.xs))
+            Text(
+                text = "Customize your focus experience",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        // App Settings Section
+        SettingsSection(title = "App Settings") {
                 SettingsSwitchItem(
                     icon = Icons.Default.Apps,
                     title = "Show System Apps",
@@ -188,43 +183,42 @@ fun SettingsScreen(
                 )
             }
 
-            // About Section
-            SettingsSection(title = "About") {
-                SettingsInfoItem(
-                    icon = Icons.Default.Info,
-                    title = "Version",
-                    value = "1.0.0"
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        // Clear Data Confirmation Dialog
-        if (uiState.showClearDataDialog) {
-            AlertDialog(
-                onDismissRequest = { viewModel.hideClearDataDialog() },
-                title = { Text("Clear All Data") },
-                text = {
-                    Text("This will remove all blocked apps and disable focus mode. Are you sure?")
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = { viewModel.clearAllData() }
-                    ) {
-                        Text(
-                            "Clear",
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { viewModel.hideClearDataDialog() }) {
-                        Text("Cancel")
-                    }
-                }
+        // About Section
+        SettingsSection(title = "About") {
+            SettingsInfoItem(
+                icon = Icons.Default.Info,
+                title = "Version",
+                value = "1.0.0"
             )
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+
+    // Clear Data Confirmation Dialog
+    if (uiState.showClearDataDialog) {
+        AlertDialog(
+            onDismissRequest = { viewModel.hideClearDataDialog() },
+            title = { Text("Clear All Data") },
+            text = {
+                Text("This will remove all blocked apps and disable focus mode. Are you sure?")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { viewModel.clearAllData() }
+                ) {
+                    Text(
+                        "Clear",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.hideClearDataDialog() }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 
@@ -239,22 +233,24 @@ private fun SettingsSection(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .padding(vertical = Spacing.sm)
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            modifier = Modifier.padding(
+                horizontal = Spacing.md,
+                vertical = Spacing.sm
+            )
         )
 
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            shape = RoundedCornerShape(12.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                .padding(horizontal = Spacing.md),
+            shape = RoundedCornerShape(CornerRadius.lg),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh
         ) {
             Column {
                 content()
@@ -278,16 +274,17 @@ private fun SettingsSwitchItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onCheckedChange(!isChecked) }
-            .padding(16.dp),
+            .padding(Spacing.md),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(IconSize.md)
         )
 
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(Spacing.md))
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
@@ -295,12 +292,15 @@ private fun SettingsSwitchItem(
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = description,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+
+        Spacer(modifier = Modifier.width(Spacing.sm))
 
         Switch(
             checked = isChecked,
@@ -323,26 +323,28 @@ private fun SettingsClickableItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(16.dp),
+            .padding(Spacing.md),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.error
+            tint = MaterialTheme.colorScheme.error,
+            modifier = Modifier.size(IconSize.md)
         )
 
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(Spacing.md))
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.error
             )
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = description,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -361,16 +363,17 @@ private fun SettingsInfoItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(Spacing.md),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(IconSize.md)
         )
 
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(Spacing.md))
 
         Text(
             text = title,
@@ -381,7 +384,7 @@ private fun SettingsInfoItem(
 
         Text(
             text = value,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
@@ -403,7 +406,7 @@ private fun SettingsSliderItem(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(Spacing.md)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -411,10 +414,11 @@ private fun SettingsSliderItem(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(IconSize.md)
             )
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(Spacing.md))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -422,22 +426,24 @@ private fun SettingsSliderItem(
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = description,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
+            Spacer(modifier = Modifier.width(Spacing.sm))
+
             Text(
                 text = valueLabel,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary
             )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         Slider(
             value = value,

@@ -54,9 +54,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tscorp.pokus.domain.model.PomodoroPhase
 import com.tscorp.pokus.domain.model.PomodoroState
+import com.tscorp.pokus.ui.theme.CornerRadius
+import com.tscorp.pokus.ui.theme.Elevation
 import com.tscorp.pokus.ui.theme.FocusActive
 import com.tscorp.pokus.ui.theme.FocusInactive
+import com.tscorp.pokus.ui.theme.IconSize
 import com.tscorp.pokus.ui.theme.Orange40
+import com.tscorp.pokus.ui.theme.Spacing
 import com.tscorp.pokus.ui.theme.Teal40
 
 /**
@@ -90,8 +94,12 @@ fun ProductivityCard(
     val isActive = focusEnabled || pomodoroState.isRunning
 
     val backgroundColor by animateColorAsState(
-        targetValue = if (isActive) FocusActive.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant,
-        animationSpec = tween(300),
+        targetValue = if (isActive) {
+            getPhaseColor(pomodoroState.phase).copy(alpha = 0.05f)
+        } else {
+            MaterialTheme.colorScheme.surfaceContainerHigh
+        },
+        animationSpec = tween(400),
         label = "backgroundColor"
     )
 
@@ -101,32 +109,36 @@ fun ProductivityCard(
         } else if (focusEnabled) {
             FocusActive
         } else {
-            MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+            Color.Transparent
         },
-        animationSpec = tween(300),
+        animationSpec = tween(400),
         label = "borderColor"
     )
 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .border(
-                width = 2.dp,
-                brush = Brush.linearGradient(
-                    colors = listOf(borderColor, borderColor.copy(alpha = 0.5f))
-                ),
-                shape = RoundedCornerShape(24.dp)
+            .then(
+                if (borderColor != Color.Transparent) {
+                    Modifier.border(
+                        width = 1.5.dp,
+                        color = borderColor.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(CornerRadius.xxl)
+                    )
+                } else Modifier
             ),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(CornerRadius.xxl),
         colors = CardDefaults.cardColors(
             containerColor = backgroundColor
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (isActive) Elevation.level2 else Elevation.level1
+        )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
+                .padding(Spacing.lg),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Status Header
@@ -137,7 +149,7 @@ fun ProductivityCard(
                 blockedAppsCount = blockedAppsCount
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(Spacing.lg))
 
             // Main Content Area
             if (pomodoroState.isRunning) {
@@ -184,21 +196,20 @@ private fun FocusStatusHeader(
         Icon(
             imageVector = Icons.Default.Shield,
             contentDescription = "Focus Status",
-            modifier = Modifier.size(48.dp),
+            modifier = Modifier.size(IconSize.xl),
             tint = iconColor
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         // Title
         Text(
             text = when {
                 pomodoroState.isRunning -> pomodoroState.phaseDisplayName
                 focusEnabled -> "Focus Mode Active"
-                else -> "Productivity Hub"
+                else -> "Ready to Focus"
             },
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.headlineSmall,
             color = iconColor
         )
 
@@ -207,11 +218,11 @@ private fun FocusStatusHeader(
             visible = pomodoroState.completedPomodoros > 0 || (focusEnabled && !pomodoroState.isRunning)
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(Spacing.xs))
                 Text(
                     text = when {
                         pomodoroState.completedPomodoros > 0 ->
-                            "${pomodoroState.completedPomodoros} pomodoro${if (pomodoroState.completedPomodoros != 1) "s" else ""} completed"
+                            "${pomodoroState.completedPomodoros} ${if (pomodoroState.completedPomodoros == 1) "session" else "sessions"} completed today"
                         focusEnabled && focusDuration.isNotEmpty() ->
                             "Active for $focusDuration"
                         else -> ""
@@ -224,9 +235,9 @@ private fun FocusStatusHeader(
 
         // Blocked apps count
         if (blockedAppsCount > 0 && !pomodoroState.isRunning) {
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(Spacing.xs))
             Text(
-                text = "$blockedAppsCount apps blocked",
+                text = "$blockedAppsCount ${if (blockedAppsCount == 1) "app" else "apps"} blocked",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -332,7 +343,7 @@ private fun PomodoroTimerDisplay(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         // Timer Controls
         Row(
@@ -343,7 +354,7 @@ private fun PomodoroTimerDisplay(
             IconButton(
                 onClick = onStop,
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(56.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.errorContainer)
             ) {
@@ -351,35 +362,35 @@ private fun PomodoroTimerDisplay(
                     imageVector = Icons.Default.Stop,
                     contentDescription = "Stop",
                     tint = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(IconSize.md)
                 )
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(Spacing.md))
 
             // Pause/Resume button (larger)
             IconButton(
                 onClick = onPauseResume,
                 modifier = Modifier
-                    .size(64.dp)
+                    .size(72.dp)
                     .clip(CircleShape)
-                    .background(getPhaseColor(pomodoroState.phase).copy(alpha = 0.2f))
+                    .background(getPhaseColor(pomodoroState.phase).copy(alpha = 0.15f))
             ) {
                 Icon(
                     imageVector = if (pomodoroState.isPaused) Icons.Default.PlayArrow else Icons.Default.Pause,
                     contentDescription = if (pomodoroState.isPaused) "Resume" else "Pause",
                     tint = getPhaseColor(pomodoroState.phase),
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier.size(IconSize.lg)
                 )
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(Spacing.md))
 
             // Skip button
             IconButton(
                 onClick = onSkip,
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(56.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.secondaryContainer)
             ) {
@@ -387,7 +398,7 @@ private fun PomodoroTimerDisplay(
                     imageVector = Icons.Default.SkipNext,
                     contentDescription = "Skip",
                     tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(IconSize.md)
                 )
             }
         }
@@ -412,48 +423,50 @@ private fun PomodoroStartControls(
             onClick = { onPomodoroStart(PomodoroPhase.WORK) },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp),
+                .height(60.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = FocusActive,
                 contentColor = Color.White
             ),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(CornerRadius.lg),
+            elevation = ButtonDefaults.buttonElevation(
+                defaultElevation = Elevation.level2,
+                pressedElevation = Elevation.level1
+            )
         ) {
             Icon(
                 imageVector = Icons.Default.PlayArrow,
                 contentDescription = null,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(IconSize.md)
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(Spacing.sm))
             Text(
                 text = "Start Focus Session",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.titleMedium
             )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         // Secondary buttons - Break options
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
             Button(
                 onClick = { onPomodoroStart(PomodoroPhase.SHORT_BREAK) },
                 modifier = Modifier
                     .weight(1f)
-                    .height(48.dp),
+                    .height(52.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Teal40.copy(alpha = 0.3f),
+                    containerColor = Teal40.copy(alpha = 0.15f),
                     contentColor = Teal40
                 ),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(CornerRadius.md)
             ) {
                 Text(
                     text = "Short Break",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium
+                    style = MaterialTheme.typography.labelLarge
                 )
             }
 
@@ -461,17 +474,16 @@ private fun PomodoroStartControls(
                 onClick = { onPomodoroStart(PomodoroPhase.LONG_BREAK) },
                 modifier = Modifier
                     .weight(1f)
-                    .height(48.dp),
+                    .height(52.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Orange40.copy(alpha = 0.3f),
+                    containerColor = Orange40.copy(alpha = 0.15f),
                     contentColor = Orange40
                 ),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(CornerRadius.md)
             ) {
                 Text(
                     text = "Long Break",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium
+                    style = MaterialTheme.typography.labelLarge
                 )
             }
         }
@@ -483,29 +495,28 @@ private fun PomodoroStartControls(
             exit = fadeOut() + shrinkVertically()
         ) {
             Column {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Spacing.md))
 
                 Button(
                     onClick = onFocusToggle,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(48.dp),
+                        .height(52.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
                         contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                     ),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(CornerRadius.md)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Shield,
                         contentDescription = null,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(IconSize.sm)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(Spacing.sm))
                     Text(
-                        text = "Enable Focus Mode Only",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium
+                        text = "Focus Mode Only",
+                        style = MaterialTheme.typography.labelLarge
                     )
                 }
             }
@@ -518,23 +529,22 @@ private fun PomodoroStartControls(
             exit = fadeOut() + shrinkVertically()
         ) {
             Column {
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(Spacing.md))
 
                 Button(
                     onClick = onFocusToggle,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(48.dp),
+                        .height(52.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.errorContainer,
                         contentColor = MaterialTheme.colorScheme.error
                     ),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(CornerRadius.md)
                 ) {
                     Text(
                         text = "Disable Focus Mode",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium
+                        style = MaterialTheme.typography.labelLarge
                     )
                 }
             }

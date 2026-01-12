@@ -2,21 +2,21 @@ package com.tscorp.pokus.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Primary Colors - Deep Purple for focus and productivity
-val Purple10 = Color(0xFF21005D)
-val Purple20 = Color(0xFF381E72)
-val Purple30 = Color(0xFF4F378B)
-val Purple40 = Color(0xFF6750A4)
-val Purple80 = Color(0xFFD0BCFF)
-val Purple90 = Color(0xFFEADDFF)
+// Primary Colors - Refined purple for modern, professional look
+val Purple10 = Color(0xFF1A0033)
+val Purple20 = Color(0xFF2D1B4E)
+val Purple30 = Color(0xFF3D2861)
+val Purple40 = Color(0xFF5B3A8E)
+val Purple80 = Color(0xFFC4B5FD)
+val Purple90 = Color(0xFFE9D5FF)
 
-// Secondary Colors - Teal for active states
-val Teal10 = Color(0xFF002020)
-val Teal20 = Color(0xFF003737)
-val Teal30 = Color(0xFF004F4F)
-val Teal40 = Color(0xFF006A6A)
-val Teal80 = Color(0xFF4DDADA)
-val Teal90 = Color(0xFF70F7F7)
+// Secondary Colors - Refined teal for modern aesthetics
+val Teal10 = Color(0xFF042F2E)
+val Teal20 = Color(0xFF134E4A)
+val Teal30 = Color(0xFF0F766E)
+val Teal40 = Color(0xFF14B8A6)
+val Teal80 = Color(0xFF5EEAD4)
+val Teal90 = Color(0xFF99F6E4)
 
 // Tertiary Colors
 val Orange10 = Color(0xFF2D1600)
@@ -44,20 +44,20 @@ val Red40 = Color(0xFFBA1A1A)
 val Red80 = Color(0xFFFFB4AB)
 val Red90 = Color(0xFFFFDAD6)
 
-// Status Colors
-val Success = Color(0xFF4CAF50)
-val Warning = Color(0xFFFFC107)
-val FocusActive = Color(0xFF00C853)
-val FocusInactive = Color(0xFF757575)
+// Status Colors - More subtle and modern
+val Success = Color(0xFF10B981)
+val Warning = Color(0xFFF59E0B)
+val FocusActive = Color(0xFF059669)  // More sophisticated green
+val FocusInactive = Color(0xFF94A3B8)  // Softer gray
 
-// Surface Colors for Dark Theme
-val SurfaceDark = Color(0xFF1C1B1F)
-val SurfaceVariantDark = Color(0xFF49454F)
-val SurfaceContainerDark = Color(0xFF211F26)
-val SurfaceContainerHighDark = Color(0xFF2B2930)
+// Surface Colors for Dark Theme - Modern, less harsh
+val SurfaceDark = Color(0xFF121212)
+val SurfaceVariantDark = Color(0xFF1E1E1E)
+val SurfaceContainerDark = Color(0xFF1A1A1A)
+val SurfaceContainerHighDark = Color(0xFF252525)
 
-// Surface Colors for Light Theme
-val SurfaceLight = Color(0xFFFFFBFE)
-val SurfaceVariantLight = Color(0xFFE7E0EC)
-val SurfaceContainerLight = Color(0xFFF3EDF7)
-val SurfaceContainerHighLight = Color(0xFFECE6F0)
+// Surface Colors for Light Theme - Cleaner, more neutral
+val SurfaceLight = Color(0xFFFAFAFA)
+val SurfaceVariantLight = Color(0xFFF3F4F6)
+val SurfaceContainerLight = Color(0xFFFFFFFF)
+val SurfaceContainerHighLight = Color(0xFFF9FAFB)
