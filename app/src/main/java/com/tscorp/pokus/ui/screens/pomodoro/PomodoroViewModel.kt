@@ -44,17 +44,18 @@ class PomodoroViewModel @Inject constructor(
         preferencesManager.pomodoroShortBreak,
         preferencesManager.pomodoroLongBreak,
         preferencesManager.pomodorosUntilLongBreak,
-        preferencesManager.pomodoroAutoStartBreaks,
-        preferencesManager.pomodoroAutoStartPomodoros
-    ) { workDuration, shortBreak, longBreak, pomodorosUntilLongBreak, autoStartBreaks, autoStartPomodoros ->
+        preferencesManager.pomodoroAutoStartBreaks
+    ) { workDuration, shortBreak, longBreak, pomodorosUntilLongBreak, autoStartBreaks ->
         PomodoroSettings(
             workDurationMinutes = workDuration,
             shortBreakMinutes = shortBreak,
             longBreakMinutes = longBreak,
             pomodorosUntilLongBreak = pomodorosUntilLongBreak,
             autoStartBreaks = autoStartBreaks,
-            autoStartPomodoros = autoStartPomodoros
+            autoStartPomodoros = false // Will be updated below
         )
+    }.combine(preferencesManager.pomodoroAutoStartPomodoros) { settings, autoStartPomodoros ->
+        settings.copy(autoStartPomodoros = autoStartPomodoros)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
