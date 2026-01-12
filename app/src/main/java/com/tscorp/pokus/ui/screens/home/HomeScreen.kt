@@ -35,8 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tscorp.pokus.ui.components.BlockedAppCard
-import com.tscorp.pokus.ui.components.FocusToggle
-import com.tscorp.pokus.ui.components.PomodoroTimer
+import com.tscorp.pokus.ui.components.ProductivityCard
 import com.tscorp.pokus.ui.screens.pomodoro.PomodoroViewModel
 import com.tscorp.pokus.util.AppUtils
 
@@ -103,24 +102,18 @@ fun HomeScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Focus Toggle Card
+            // Unified Productivity Card (Focus Mode + Pomodoro Timer)
             item {
-                FocusToggle(
-                    isEnabled = focusState.isEnabled,
-                    onToggle = { viewModel.toggleFocusMode() },
+                ProductivityCard(
+                    focusEnabled = focusState.isEnabled,
                     focusDuration = focusState.formattedDuration,
-                    blockedAppsCount = focusState.blockedAppsCount
-                )
-            }
-
-            // Pomodoro Timer Card
-            item {
-                PomodoroTimer(
+                    blockedAppsCount = focusState.blockedAppsCount,
                     pomodoroState = pomodoroState,
-                    onStart = { phase -> pomodoroViewModel.startTimer(phase) },
-                    onPauseResume = { pomodoroViewModel.togglePauseResume() },
-                    onStop = { pomodoroViewModel.stopTimer() },
-                    onSkip = { pomodoroViewModel.skipPhase() }
+                    onFocusToggle = { viewModel.toggleFocusMode() },
+                    onPomodoroStart = { phase -> pomodoroViewModel.startTimer(phase) },
+                    onPomodoroPauseResume = { pomodoroViewModel.togglePauseResume() },
+                    onPomodoroStop = { pomodoroViewModel.stopTimer() },
+                    onPomodoroSkip = { pomodoroViewModel.skipPhase() }
                 )
             }
 

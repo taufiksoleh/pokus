@@ -109,8 +109,15 @@ class PomodoroViewModel @Inject constructor(
 
     /**
      * Starts the Pomodoro timer with the given phase.
+     * Automatically enables Focus Mode when starting a work session.
      */
     fun startTimer(phase: PomodoroPhase = PomodoroPhase.WORK) {
+        // Auto-enable Focus Mode when starting a work session for better productivity
+        if (phase == PomodoroPhase.WORK) {
+            viewModelScope.launch {
+                preferencesManager.setFocusModeEnabled(true)
+            }
+        }
         PomodoroService.start(application, phase)
     }
 
