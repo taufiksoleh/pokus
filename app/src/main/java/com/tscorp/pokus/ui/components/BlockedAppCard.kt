@@ -34,6 +34,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
+import com.tscorp.pokus.ui.theme.CornerRadius
+import com.tscorp.pokus.ui.theme.IconSize
+import com.tscorp.pokus.ui.theme.Spacing
 
 /**
  * A card displaying a blocked app with its icon and name.
@@ -54,23 +57,23 @@ fun BlockedAppCard(
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        shape = RoundedCornerShape(CornerRadius.lg),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(Spacing.md),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // App Icon
             BlockedAppIcon(
                 icon = icon,
                 contentDescription = appName,
-                modifier = Modifier.size(44.dp)
+                modifier = Modifier.size(48.dp)
             )
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(Spacing.md))
 
             // App Info
             Column(
@@ -78,31 +81,42 @@ fun BlockedAppCard(
             ) {
                 Text(
                     text = appName,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = packageName,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }
 
+            Spacer(modifier = Modifier.width(Spacing.sm))
+
             // Blocked indicator or remove button
             if (onRemove != null) {
                 IconButton(
                     onClick = onRemove,
-                    modifier = Modifier.size(36.dp)
+                    modifier = Modifier.size(40.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Remove from blocked list",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(IconSize.sm)
                     )
                 }
             } else {
                 Icon(
                     imageVector = Icons.Default.Block,
                     contentDescription = "Blocked",
-                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
-                    modifier = Modifier.size(20.dp)
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(IconSize.sm)
                 )
             }
         }
@@ -136,15 +150,15 @@ private fun BlockedAppIcon(
                 bitmap = cachedBitmap,
                 contentDescription = contentDescription,
                 modifier = Modifier
-                    .size(44.dp)
-                    .clip(RoundedCornerShape(10.dp)),
+                    .matchParentSize()
+                    .clip(RoundedCornerShape(CornerRadius.md)),
                 contentScale = ContentScale.Fit
             )
         } else {
             Box(
                 modifier = Modifier
-                    .size(44.dp)
-                    .clip(RoundedCornerShape(10.dp))
+                    .matchParentSize()
+                    .clip(RoundedCornerShape(CornerRadius.md))
                     .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
@@ -152,7 +166,7 @@ private fun BlockedAppIcon(
                     imageVector = Icons.Default.Android,
                     contentDescription = contentDescription,
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.size(28.dp)
+                    modifier = Modifier.size(IconSize.md)
                 )
             }
         }

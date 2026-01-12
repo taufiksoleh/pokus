@@ -41,6 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tscorp.pokus.ui.components.AppItem
+import com.tscorp.pokus.ui.theme.CornerRadius
+import com.tscorp.pokus.ui.theme.Spacing
 
 /**
  * Screen for selecting apps to block.
@@ -70,21 +72,21 @@ fun AppListScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Select Apps to Block",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.SemiBold
+                        text = "Select Apps",
+                        style = MaterialTheme.typography.headlineMedium
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = "Back",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             )
         },
@@ -99,18 +101,24 @@ fun AppListScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = Spacing.md, vertical = Spacing.sm)
             ) {
                 // Search Field
                 OutlinedTextField(
                     value = uiState.searchQuery,
                     onValueChange = { viewModel.onSearchQueryChange(it) },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Search apps...") },
+                    placeholder = {
+                        Text(
+                            "Search apps...",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        )
+                    },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Search,
-                            contentDescription = "Search"
+                            contentDescription = "Search",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
                     trailingIcon = {
@@ -118,40 +126,37 @@ fun AppListScreen(
                             IconButton(onClick = { viewModel.onSearchQueryChange("") }) {
                                 Icon(
                                     imageVector = Icons.Default.Clear,
-                                    contentDescription = "Clear search"
+                                    contentDescription = "Clear search",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
                     },
                     singleLine = true,
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(CornerRadius.lg)
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(Spacing.md))
 
-                // Filter Chips
+                // Filter Chips and count
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     FilterChip(
                         selected = uiState.showSystemApps,
                         onClick = { viewModel.toggleShowSystemApps() },
-                        label = { Text("Show System Apps") }
+                        label = { Text("System Apps") }
+                    )
+
+                    Text(
+                        text = "${uiState.filteredApps.size} ${if (uiState.filteredApps.size == 1) "app" else "apps"}",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // App count
-                Text(
-                    text = "${uiState.filteredApps.size} apps",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
 
             // App List or Loading
             if (uiState.isLoading) {
@@ -164,8 +169,8 @@ fun AppListScreen(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    contentPadding = PaddingValues(Spacing.md),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.sm)
                 ) {
                     items(
                         items = uiState.filteredApps,
@@ -183,18 +188,30 @@ fun AppListScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 32.dp),
+                                    .padding(vertical = Spacing.xxl),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = if (uiState.searchQuery.isNotEmpty()) {
-                                        "No apps found matching \"${uiState.searchQuery}\""
-                                    } else {
-                                        "No apps available"
-                                    },
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+                                ) {
+                                    Text(
+                                        text = if (uiState.searchQuery.isNotEmpty()) {
+                                            "No apps found"
+                                        } else {
+                                            "No apps available"
+                                        },
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    if (uiState.searchQuery.isNotEmpty()) {
+                                        Text(
+                                            text = "Try a different search term",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

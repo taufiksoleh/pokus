@@ -37,6 +37,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tscorp.pokus.ui.components.BlockedAppCard
 import com.tscorp.pokus.ui.components.ProductivityCard
 import com.tscorp.pokus.ui.screens.pomodoro.PomodoroViewModel
+import com.tscorp.pokus.ui.theme.CornerRadius
+import com.tscorp.pokus.ui.theme.Elevation
+import com.tscorp.pokus.ui.theme.Spacing
 import com.tscorp.pokus.util.AppUtils
 
 /**
@@ -66,41 +69,53 @@ fun HomeScreen(
                 title = {
                     Text(
                         text = "Pokus",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.headlineMedium
                     )
                 },
                 actions = {
-                    IconButton(onClick = onNavigateToSettings) {
+                    IconButton(
+                        onClick = onNavigateToSettings,
+                        modifier = Modifier.padding(end = Spacing.xs)
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings"
+                            contentDescription = "Settings",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onNavigateToAppList,
-                containerColor = MaterialTheme.colorScheme.primary
+                containerColor = MaterialTheme.colorScheme.primary,
+                elevation = androidx.compose.material3.FloatingActionButtonDefaults.elevation(
+                    defaultElevation = Elevation.level3
+                )
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Add apps to block"
                 )
             }
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.surface
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            contentPadding = PaddingValues(
+                start = Spacing.md,
+                end = Spacing.md,
+                top = Spacing.sm,
+                bottom = Spacing.md
+            ),
+            verticalArrangement = Arrangement.spacedBy(Spacing.lg)
         ) {
             // Unified Productivity Card (Focus Mode + Pomodoro Timer)
             item {
@@ -120,16 +135,21 @@ fun HomeScreen(
             // Blocked Apps Section Header
             if (blockedApps.isNotEmpty()) {
                 item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = Spacing.xs)
                     ) {
                         Text(
-                            text = "Blocked Apps (${blockedApps.size})",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
+                            text = "Blocked Apps",
+                            style = MaterialTheme.typography.titleLarge,
                             color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(Spacing.xs))
+                        Text(
+                            text = "${blockedApps.size} ${if (blockedApps.size == 1) "app" else "apps"} will be blocked during focus sessions",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -172,20 +192,21 @@ private fun EmptyBlockedAppsState(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 32.dp),
+            .padding(vertical = Spacing.xxl),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = "No apps blocked yet",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
         Text(
-            text = "Tap the + button to add apps to block",
+            text = "Add apps to block during focus sessions",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
     }
 }
