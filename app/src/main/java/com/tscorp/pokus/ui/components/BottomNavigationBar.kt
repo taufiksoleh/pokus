@@ -4,15 +4,17 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
@@ -23,14 +25,14 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -50,14 +52,14 @@ fun BottomNavigationBar(
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface,
-        shadowElevation = 8.dp
+        shadowElevation = 8.dp,
+        tonalElevation = 3.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
                 .height(80.dp)
-                .selectableGroup()
                 .padding(horizontal = Spacing.md, vertical = Spacing.sm),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
@@ -67,7 +69,8 @@ fun BottomNavigationBar(
                 icon = Icons.Outlined.Home,
                 selectedIcon = Icons.Filled.Home,
                 selected = currentRoute == Routes.Home.route,
-                onClick = { onNavigate(Routes.Home.route) }
+                onClick = { onNavigate(Routes.Home.route) },
+                modifier = Modifier.weight(1f)
             )
 
             BottomNavItem(
@@ -75,7 +78,8 @@ fun BottomNavigationBar(
                 icon = Icons.Outlined.Apps,
                 selectedIcon = Icons.Filled.Apps,
                 selected = currentRoute == Routes.AppList.route,
-                onClick = { onNavigate(Routes.AppList.route) }
+                onClick = { onNavigate(Routes.AppList.route) },
+                modifier = Modifier.weight(1f)
             )
 
             BottomNavItem(
@@ -83,7 +87,8 @@ fun BottomNavigationBar(
                 icon = Icons.Outlined.Settings,
                 selectedIcon = Icons.Filled.Settings,
                 selected = currentRoute == Routes.Settings.route,
-                onClick = { onNavigate(Routes.Settings.route) }
+                onClick = { onNavigate(Routes.Settings.route) },
+                modifier = Modifier.weight(1f)
             )
         }
     }
@@ -124,39 +129,42 @@ private fun BottomNavItem(
         label = "backgroundColor"
     )
 
-    NavigationBarItem(
-        selected = selected,
-        onClick = onClick,
-        icon = {
-            Box(
-                modifier = Modifier
-                    .size(64.dp)
-                    .background(backgroundColor, CircleShape)
-                    .scale(scale),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = if (selected) selectedIcon else icon,
-                    contentDescription = label,
-                    tint = iconColor,
-                    modifier = Modifier.size(28.dp)
-                )
-            }
-        },
-        label = {
-            if (selected) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = iconColor
-                )
-            }
-        },
-        colors = NavigationBarItemDefaults.colors(
-            selectedIconColor = iconColor,
-            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            indicatorColor = Color.Transparent
-        ),
+    val interactionSource = remember { MutableInteractionSource() }
+
+    Column(
         modifier = modifier
-    )
+            .clip(CircleShape)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+            .padding(vertical = Spacing.xs),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size(56.dp)
+                .background(backgroundColor, CircleShape)
+                .scale(scale),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = if (selected) selectedIcon else icon,
+                contentDescription = label,
+                tint = iconColor,
+                modifier = Modifier.size(28.dp)
+            )
+        }
+
+        if (selected) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = iconColor,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+    }
 }
