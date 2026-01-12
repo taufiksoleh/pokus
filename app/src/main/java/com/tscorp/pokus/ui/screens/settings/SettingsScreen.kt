@@ -17,7 +17,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Slider
 import androidx.compose.material3.AlertDialog
@@ -35,17 +34,14 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tscorp.pokus.ui.screens.pomodoro.PomodoroViewModel
-import com.tscorp.pokus.util.PermissionUtils
 import kotlin.math.roundToInt
 
 /**
@@ -63,10 +59,6 @@ fun SettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val pomodoroSettings by pomodoroViewModel.pomodoroSettings.collectAsStateWithLifecycle()
-    val context = LocalContext.current
-    val hasNotificationListenerAccess = remember(context) {
-        PermissionUtils.hasNotificationListenerPermission(context)
-    }
 
     Scaffold(
         topBar = {
@@ -98,22 +90,6 @@ fun SettingsScreen(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Permissions Section
-            SettingsSection(title = "Permissions") {
-                SettingsClickableItem(
-                    icon = Icons.Default.Notifications,
-                    title = "Notification Access",
-                    description = if (hasNotificationListenerAccess) {
-                        "Granted - Notifications from blocked apps will be hidden"
-                    } else {
-                        "Required to hide notifications from blocked apps"
-                    },
-                    onClick = {
-                        context.startActivity(PermissionUtils.notificationListenerSettingsIntent())
-                    }
-                )
-            }
-
             // App Settings Section
             SettingsSection(title = "App Settings") {
                 SettingsSwitchItem(
@@ -208,8 +184,7 @@ fun SettingsScreen(
                     icon = Icons.Default.Delete,
                     title = "Clear All Blocked Apps",
                     description = "${uiState.blockedAppsCount} apps blocked",
-                    onClick = { viewModel.showClearDataDialog() },
-                    iconTint = MaterialTheme.colorScheme.error
+                    onClick = { viewModel.showClearDataDialog() }
                 )
             }
 
@@ -342,8 +317,7 @@ private fun SettingsClickableItem(
     icon: ImageVector,
     title: String,
     description: String,
-    onClick: () -> Unit,
-    iconTint: androidx.compose.ui.graphics.Color? = null
+    onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -355,7 +329,7 @@ private fun SettingsClickableItem(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = iconTint ?: MaterialTheme.colorScheme.onSurfaceVariant
+            tint = MaterialTheme.colorScheme.error
         )
 
         Spacer(modifier = Modifier.width(16.dp))

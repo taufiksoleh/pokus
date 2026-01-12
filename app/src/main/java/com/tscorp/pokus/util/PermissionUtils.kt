@@ -78,23 +78,6 @@ object PermissionUtils {
     }
 
     /**
-     * Checks if the app has notification listener access.
-     * This permission is required to filter notifications from blocked apps.
-     *
-     * @param context Application context
-     * @return True if notification listener access is granted
-     */
-    fun hasNotificationListenerPermission(context: Context): Boolean {
-        val enabledListeners = Settings.Secure.getString(
-            context.contentResolver,
-            "enabled_notification_listeners"
-        ) ?: return false
-
-        val packageName = context.packageName
-        return enabledListeners.contains(packageName)
-    }
-
-    /**
      * Checks if all required permissions are granted.
      *
      * @param context Application context
@@ -150,16 +133,6 @@ object PermissionUtils {
                 data = Uri.parse("package:${context.packageName}")
             }
         }
-    }
-
-    /**
-     * Creates an intent to open Notification Listener settings.
-     * Users can grant notification access from this screen.
-     *
-     * @return Intent to open notification listener settings
-     */
-    fun notificationListenerSettingsIntent(): Intent {
-        return Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
     }
 
     /**
